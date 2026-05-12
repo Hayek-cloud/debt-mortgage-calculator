@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Debt &amp; Mortgage Impact Calculator</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css" />
+<style>
+  :root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f4ef;
+    --bg-tertiary: #faf9f5;
+    --text-primary: #1a1a1a;
+    --text-secondary: #5f5e5a;
+    --text-tertiary: #888780;
+    --text-danger: #A32D2D;
+    --border-tertiary: rgba(0,0,0,0.12);
+    --border-secondary: rgba(0,0,0,0.25);
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg-primary: #1f1f1d;
+      --bg-secondary: #2a2a28;
+      --bg-tertiary: #18181a;
+      --text-primary: #f0eee5;
+      --text-secondary: #b4b2a9;
+      --text-tertiary: #888780;
+      --text-danger: #F09595;
+      --border-tertiary: rgba(255,255,255,0.15);
+      --border-secondary: rgba(255,255,255,0.3);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 2rem 1rem;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text-primary);
+    background: var(--bg-tertiary);
+    -webkit-font-smoothing: antialiased;
+  }
+  .container {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 22px;
+    font-weight: 500;
+    margin: 0 0 0.5rem;
+  }
+  .subtitle {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin: 0 0 2rem;
+  }
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--border-tertiary);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    background: var(--text-primary);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    background: var(--text-primary);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+  }
+  button {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 6px 12px;
+    background: transparent;
+    color: var(--text-primary);
+    border: 0.5px solid var(--border-secondary);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  button:hover { background: var(--bg-secondary); }
+  button:active { transform: scale(0.98); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 10px 14px; }
+  .footer {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 0.5px solid var(--border-tertiary);
+    font-size: 12px;
+    color: var(--text-tertiary);
+    text-align: center;
+  }
+  .footer a { color: var(--text-secondary); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>Debt &amp; mortgage impact calculator</h1>
+  <p class="subtitle">How rising federal debt feeds into the rate on a new 30-year mortgage.</p>
+
+  <div id="headline" style="background: var(--bg-secondary); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;">
+    <p style="margin: 0; font-size: 15px; line-height: 1.6;">
+      Your payment on a new <span id="hl-term">30</span>yr mortgage is higher by <span id="hl-monthly" style="font-weight: 500; color: var(--text-danger);">$515</span> per month due to the interest rate effects of increases in government debt since <span id="hl-year">2006</span>. You will pay more than <span id="hl-lifetime" style="font-weight: 500; color: var(--text-danger);">$185,300</span> additional over the life of the loan.
+    </p>
+  </div>
+
+  <div style="display: flex; justify-content: flex-end; margin-bottom: 0.75rem;">
+    <button id="reset-btn" type="button" style="display: inline-flex; align-items: center; gap: 6px;">
+      <i class="ti ti-refresh" style="font-size: 14px;" aria-hidden="true"></i>
+      Reset to defaults
+    </button>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.5rem; margin-bottom: 1.5rem;">
+
+    <div>
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+        <label style="font-size: 13px; color: var(--text-secondary);">Home price</label>
+        <span id="price-out" style="font-size: 14px; font-weight: 500;">$403,200</span>
+      </div>
+      <input type="range" id="price" min="100000" max="5000000" step="1000" value="403200" />
+      <p style="font-size: 12px; color: var(--text-tertiary); margin: 4px 0 0;">Default: U.S. Census MSPUS median new home</p>
+    </div>
+
+    <div>
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+        <label style="font-size: 13px; color: var(--text-secondary);">Down payment</label>
+        <span id="down-out" style="font-size: 14px; font-weight: 500;">20%</span>
+      </div>
+      <input type="range" id="down" min="0" max="50" step="1" value="20" />
+      <p style="font-size: 12px; color: var(--text-tertiary); margin: 4px 0 0;">Share of home price paid up front</p>
+    </div>
+
+    <div>
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+        <label style="font-size: 13px; color: var(--text-secondary);">Mortgage term</label>
+        <span id="term-out" style="font-size: 14px; font-weight: 500;">30 yrs</span>
+      </div>
+      <input type="range" id="term" min="5" max="30" step="1" value="30" />
+      <p style="font-size: 12px; color: var(--text-tertiary); margin: 4px 0 0;">Loan amortization period</p>
+    </div>
+
+    <div>
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+        <label style="font-size: 13px; color: var(--text-secondary);">Current mortgage rate</label>
+        <span id="mort-out" style="font-size: 14px; font-weight: 500;">6.45%</span>
+      </div>
+      <input type="range" id="mort" min="2" max="10" step="0.05" value="6.45" />
+      <p style="font-size: 12px; color: var(--text-tertiary); margin: 4px 0 0;">Default: May 2026 (6.45%)</p>
+    </div>
+
+    <div>
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+        <label style="font-size: 13px; color: var(--text-secondary);">Current debt held by public / GDP</label>
+        <span id="cur-out" style="font-size: 14px; font-weight: 500;">101%</span>
+      </div>
+      <input type="range" id="cur" min="100" max="200" step="1" value="101" />
+      <p style="font-size: 12px; color: var(--text-tertiary); margin: 4px 0 0;">Default: 2026 CBO forecast (101%)</p>
+    </div>
+
+    <div>
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+        <label style="font-size: 13px; color: var(--text-secondary);">Debt sensitivity</label>
+        <span id="sens-out" style="font-size: 14px; font-weight: 500;">4 bp</span>
+      </div>
+      <input type="range" id="sens" min="2" max="10" step="1" value="4" />
+      <p style="font-size: 12px; color: var(--text-tertiary); margin: 4px 0 0;">CBO uses 2 bp; literature suggests ≥4 bp</p>
+    </div>
+
+    <div style="grid-column: 1 / -1; max-width: calc(50% - 0.75rem);">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+        <label style="font-size: 13px; color: var(--text-secondary);">Starting comparison year</label>
+        <span id="yr-out" style="font-size: 14px; font-weight: 500;">2006 → 35.4%</span>
+      </div>
+      <input type="range" id="yr" min="1970" max="2025" step="1" value="2006" />
+      <p style="font-size: 12px; color: var(--text-tertiary); margin: 4px 0 0;">Debt-to-GDP in chosen baseline year</p>
+    </div>
+
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 1.25rem;">
+    <div style="background: var(--bg-secondary); border-radius: var(--radius-md); padding: 0.875rem 1rem;">
+      <p style="font-size: 12px; color: var(--text-secondary); margin: 0 0 4px;">Debt-to-GDP change</p>
+      <p id="m-delta-debt" style="font-size: 20px; font-weight: 500; margin: 0;">+65.2 pp</p>
+    </div>
+    <div style="background: var(--bg-secondary); border-radius: var(--radius-md); padding: 0.875rem 1rem;">
+      <p style="font-size: 12px; color: var(--text-secondary); margin: 0 0 4px;">Rate impact</p>
+      <p id="m-delta-rate" style="font-size: 20px; font-weight: 500; margin: 0;">+2.61 pp</p>
+    </div>
+    <div style="background: var(--bg-secondary); border-radius: var(--radius-md); padding: 0.875rem 1rem;">
+      <p style="font-size: 12px; color: var(--text-secondary); margin: 0 0 4px;">Counterfactual rate</p>
+      <p id="m-cf-rate" style="font-size: 20px; font-weight: 500; margin: 0;">3.84%</p>
+    </div>
+    <div style="background: var(--bg-secondary); border-radius: var(--radius-md); padding: 0.875rem 1rem;">
+      <p style="font-size: 12px; color: var(--text-secondary); margin: 0 0 4px;">Share of payment</p>
+      <p id="m-share" style="font-size: 20px; font-weight: 500; margin: 0;">25%</p>
+    </div>
+  </div>
+
+  <div style="border: 0.5px solid var(--border-tertiary); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 1rem;">
+    <table>
+      <thead>
+        <tr style="background: var(--bg-secondary);">
+          <th id="tbl-head" style="text-align: left; font-weight: 500; color: var(--text-secondary);">$403,200 home, 20% down ($322,560 loan, 30 yrs)</th>
+          <th style="text-align: right; font-weight: 500; color: var(--text-secondary);">Counterfactual</th>
+          <th style="text-align: right; font-weight: 500; color: var(--text-secondary);">Today</th>
+          <th style="text-align: right; font-weight: 500; color: var(--text-secondary);">Difference</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-top: 0.5px solid var(--border-tertiary);">
+          <td>Mortgage rate</td>
+          <td id="t-cf-rate" style="text-align: right;">3.84%</td>
+          <td id="t-today-rate" style="text-align: right;">6.45%</td>
+          <td id="t-d-rate" style="text-align: right; color: var(--text-danger);">+2.61 pp</td>
+        </tr>
+        <tr style="border-top: 0.5px solid var(--border-tertiary);">
+          <td>Monthly payment (P&amp;I)</td>
+          <td id="t-cf-pmt" style="text-align: right;">$1,511</td>
+          <td id="t-today-pmt" style="text-align: right;">$2,026</td>
+          <td id="t-d-pmt" style="text-align: right; color: var(--text-danger);">+$515</td>
+        </tr>
+        <tr style="border-top: 0.5px solid var(--border-tertiary);">
+          <td id="t-int-label">Total interest over 30 yrs</td>
+          <td id="t-cf-int" style="text-align: right;">$221,400</td>
+          <td id="t-today-int" style="text-align: right;">$406,700</td>
+          <td id="t-d-int" style="text-align: right; color: var(--text-danger);">+$185,300</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p style="font-size: 12px; color: var(--text-tertiary); margin: 0;">
+    Methodology: rate impact = (current − baseline debt/GDP) × sensitivity, applied one-for-one to mortgage rate. Payments use standard amortization over the selected term.
+  </p>
+
+  <div class="footer">
+    Golden State Reality Check · Josh Rauh
+  </div>
+
+</div>
+
+<script>
+(function() {
+  const debtByYear = {1970:27.1,1971:27.1,1972:26.5,1973:25.2,1974:23.2,1975:24.6,1976:26.7,1977:27.1,1978:26.7,1979:25.0,1980:25.5,1981:25.2,1982:27.9,1983:32.2,1984:33.1,1985:35.3,1986:38.5,1987:39.6,1988:39.9,1989:39.4,1990:40.9,1991:44.1,1992:46.8,1993:47.9,1994:47.8,1995:47.7,1996:47.0,1997:44.6,1998:41.7,1999:38.3,2000:33.7,2001:31.5,2002:32.7,2003:34.7,2004:35.7,2005:35.8,2006:35.4,2007:35.2,2008:39.2,2009:52.2,2010:60.6,2011:65.5,2012:70.0,2013:71.8,2014:73.3,2015:72.2,2016:76.0,2017:75.7,2018:77.1,2019:78.9,2020:98.5,2021:96.7,2022:94.9,2023:95.8,2024:97.4,2025:99.4};
+
+  const defaults = {
+    price: 403200, down: 20, term: 30, mort: 6.45,
+    cur: 101, sens: 4, yr: 2006
+  };
+
+  const fmt$ = (v) => '$' + Math.round(v).toLocaleString();
+  const fmtPct = (v, d=2) => v.toFixed(d) + '%';
+  const fmtPp = (v, d=2) => (v >= 0 ? '+' : '') + v.toFixed(d) + ' pp';
+
+  function monthlyPmt(rateAnnualPct, loan, n) {
+    const r = (rateAnnualPct / 100) / 12;
+    if (n <= 0) return 0;
+    if (r === 0) return loan / n;
+    return loan * r / (1 - Math.pow(1 + r, -n));
+  }
+
+  function recalc() {
+    const price = parseFloat(document.getElementById('price').value);
+    const downPct = parseFloat(document.getElementById('down').value);
+    const termYrs = parseInt(document.getElementById('term').value);
+    const mort = parseFloat(document.getElementById('mort').value);
+    const cur = parseFloat(document.getElementById('cur').value);
+    const sens = parseFloat(document.getElementById('sens').value);
+    const yr = parseInt(document.getElementById('yr').value);
+
+    const loan = price * (1 - downPct / 100);
+    const n = termYrs * 12;
+    const baseDebt = debtByYear[yr];
+    const deltaDebt = cur - baseDebt;
+    const deltaRate = deltaDebt * (sens / 100);
+    const cfRate = Math.max(0, mort - deltaRate);
+    const todayPmt = monthlyPmt(mort, loan, n);
+    const cfPmt = monthlyPmt(cfRate, loan, n);
+    const dPmt = todayPmt - cfPmt;
+    const todayInt = todayPmt * n - loan;
+    const cfInt = cfPmt * n - loan;
+    const dInt = todayInt - cfInt;
+    const share = todayPmt > 0 ? (dPmt / todayPmt) * 100 : 0;
+
+    document.getElementById('price-out').textContent = fmt$(price);
+    document.getElementById('down-out').textContent = downPct + '%';
+    document.getElementById('term-out').textContent = termYrs + ' yrs';
+    document.getElementById('mort-out').textContent = mort.toFixed(2) + '%';
+    document.getElementById('cur-out').textContent = cur + '%';
+    document.getElementById('sens-out').textContent = sens + ' bp';
+    document.getElementById('yr-out').textContent = yr + ' → ' + baseDebt.toFixed(1) + '%';
+    document.getElementById('hl-term').textContent = termYrs;
+    document.getElementById('hl-year').textContent = yr;
+    document.getElementById('hl-monthly').textContent = fmt$(dPmt);
+    document.getElementById('hl-lifetime').textContent = fmt$(dInt);
+    document.getElementById('m-delta-debt').textContent = fmtPp(deltaDebt, 1);
+    document.getElementById('m-delta-rate').textContent = fmtPp(deltaRate);
+    document.getElementById('m-cf-rate').textContent = fmtPct(cfRate);
+    document.getElementById('m-share').textContent = Math.round(share) + '%';
+    document.getElementById('tbl-head').textContent =
+      fmt$(price) + ' home, ' + downPct + '% down (' + fmt$(loan) + ' loan, ' + termYrs + ' yrs)';
+    document.getElementById('t-int-label').textContent = 'Total interest over ' + termYrs + ' yrs';
+    document.getElementById('t-cf-rate').textContent = fmtPct(cfRate);
+    document.getElementById('t-today-rate').textContent = fmtPct(mort);
+    document.getElementById('t-d-rate').textContent = fmtPp(deltaRate);
+    document.getElementById('t-cf-pmt').textContent = fmt$(cfPmt);
+    document.getElementById('t-today-pmt').textContent = fmt$(todayPmt);
+    document.getElementById('t-d-pmt').textContent = '+' + fmt$(dPmt);
+    document.getElementById('t-cf-int').textContent = fmt$(cfInt);
+    document.getElementById('t-today-int').textContent = fmt$(todayInt);
+    document.getElementById('t-d-int').textContent = '+' + fmt$(dInt);
+  }
+
+  ['price','down','term','mort','cur','sens','yr'].forEach(id => {
+    document.getElementById(id).addEventListener('input', recalc);
+  });
+
+  document.getElementById('reset-btn').addEventListener('click', function() {
+    Object.keys(defaults).forEach(id => {
+      document.getElementById(id).value = defaults[id];
+    });
+    recalc();
+  });
+
+  recalc();
+})();
+</script>
+</body>
+</html>
